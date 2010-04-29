@@ -2,6 +2,11 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "labelsCUDA", "labelsCUDA\labelsCUDA.vcproj", "{298D2361-4AAD-4280-90EA-8631BA613B16}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D721B328-86A6-4085-9586-52453B78D5AA} = {D721B328-86A6-4085-9586-52453B78D5AA}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WordFinder", "WordFinder\WordFinder.vcproj", "{D721B328-86A6-4085-9586-52453B78D5AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +18,10 @@ Global
 		{298D2361-4AAD-4280-90EA-8631BA613B16}.Debug|Win32.Build.0 = Debug|Win32
 		{298D2361-4AAD-4280-90EA-8631BA613B16}.Release|Win32.ActiveCfg = Release|Win32
 		{298D2361-4AAD-4280-90EA-8631BA613B16}.Release|Win32.Build.0 = Release|Win32
+		{D721B328-86A6-4085-9586-52453B78D5AA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D721B328-86A6-4085-9586-52453B78D5AA}.Debug|Win32.Build.0 = Debug|Win32
+		{D721B328-86A6-4085-9586-52453B78D5AA}.Release|Win32.ActiveCfg = Release|Win32
+		{D721B328-86A6-4085-9586-52453B78D5AA}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

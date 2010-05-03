@@ -1,9 +1,10 @@
+#pragma once
 
 class State;
 
 struct Transition
 {
 public:
-	State* NextState;
+	int NextState;
 	int Output;
 };

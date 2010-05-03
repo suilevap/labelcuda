@@ -5,10 +5,11 @@
 
 class State
 {
-public:
+public:	
 	Transition Transitions[256];
+	static const int StateSize = sizeof(Transition) *  256;
 
-	void AddManyTransitions(char* symbols, State* nextState, int output);
+	void AddManyTransitions(char* symbols, int nextStateId, int output);
 	State(void);
 	~State(void);
 };

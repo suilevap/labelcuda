@@ -25,6 +25,10 @@
 //#include <FileLoader.h>
 #include "FileStruct.h"
 
+#include "..\WordFinder\WordFinderLib.h"
+
+void Foo();
+
 __global__ void
 test(char *a, int len)
 {
@@ -87,8 +91,9 @@ int PrintDevices(int deviceCount, int deviceSelected)
     return cudaSuccess;
 }
 
-int main(void)
+int main()
 {
+	Foo();
 	PrintDevices(1,0);
 
 
@@ -145,4 +150,21 @@ char* Test2(char* text, size_t size)
 	cudaMemcpy(a, text, size, cudaMemcpyHostToDevice);
 	
 	return a;
+}
+
+void Foo()
+{
+	WordFinder* finder = CreateWordFinder();
+	FILE* f = fopen("words.txt","rt");
+	char* tmpBuf = new char[64];
+	std::vector<std::string> words;
+	while (!feof(f))
+	{
+		fgets(tmpBuf, 64, f);
+		std::string word = tmpBuf;
+		words.push_back(word);	
+	}
+	finder->AddWords( words );
+	delete[] tmpBuf;
+	TrunsactionsTable* tables = finder->Generate();
 }

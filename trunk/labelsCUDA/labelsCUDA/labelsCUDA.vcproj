@@ -149,6 +149,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions="WordFinder.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -192,7 +193,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test2.cu"
+				RelativePath=".\labelsCUDA.cu"
 				>
 			</File>
 		</Filter>
@@ -222,6 +223,10 @@
 			<File
 				RelativePath=".\goog1.htm"
 				DeploymentContent="true"
+				>
+			</File>
+			<File
+				RelativePath=".\words.txt"
 				>
 			</File>
 		</Filter>

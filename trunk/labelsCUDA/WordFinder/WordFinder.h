@@ -1,18 +1,22 @@
 #pragma once
 #include "State.h"
+
 #include <vector>
 #include "TransactionsTable.h"
 
-char* TerminationSymbols = " \n~!@#$%^&*()_+=-`{}[];':"",./<>?";
+#define TerminationSymbols " \n~!@#$%^&*()_+=-`{}[];':"",./<>?"
 
 class WordFinder
 {
 private:
 	std::vector<State*> _states;
+
 public:
 	
 
-	void AddWord(char* word, int id);
+	void AddWord(std::string word, int id);
+
+	void AddWords(std::vector<std::string> words);
 
 	TrunsactionsTable* Generate();
 

@@ -1,7 +1,6 @@
 // WordFinder.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
 #include "WordFinder.h"
 
 
@@ -15,34 +14,45 @@ WordFinder::~WordFinder(void)
 {
 }
 
-void WordFinder::AddWord( char* word, int id )
+void WordFinder::AddWord( std::string word, int id )
 {
+	int stateId;
 	State* state;
-	State* currentState = _states[0];
-	
+	int currentStateId = 0;
+	State* currentState;
+
 	for (int i = 0; word[i] != 0; i++)
 	{
-		state = currentState->Transitions[word[i]].NextState;
+		currentState = _states[currentStateId];
+		stateId = currentState->Transitions[word[i]].NextState;
 		
-		if (state == NULL)
+		if (stateId == 0)
 		{
 			state = new State();
-			currentState->Transitions[word[i]].NextState = state;
 			_states.push_back(state);
+			stateId = _states.size() - 1;
+			currentState->Transitions[word[i]].NextState = stateId;
 		}
-		currentState = state;
+		currentStateId = stateId;
 	}
-	currentState->AddManyTransitions(TerminationSymbols, _states[0],id);
+	currentState->AddManyTransitions(TerminationSymbols, 0, id);
 }
 
 TrunsactionsTable* WordFinder::Generate()
 {
-	int size = _states.size();
-	TrunsactionsTable* result = new TrunsactionsTable();
-	result->Table = new Transition[result->ElementSize * size];
-	for (int i = 0; i < size; ++i)
+	size_t size = _states.size();
+	TrunsactionsTable* result = new TrunsactionsTable(size);
+	for (size_t i = 0; i < size; ++i)
 	{
-		memcpy( &result->Table[result->ElementSize * i], _states[i]->Transitions, 256);
+		memcpy( result->GetState(i), _states[i]->Transitions, State.StateSize );
 	}
 	return result;
+}
+
+void WordFinder::AddWords( std::vector<std::string> words )
+{
+	for (int i = 0; i < words.size(); i++)
+	{
+		AddWord(words[i], i);
+	}
 }

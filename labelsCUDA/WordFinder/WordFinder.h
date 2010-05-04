@@ -2,7 +2,7 @@
 #include "State.h"
 
 #include <vector>
-#include "TransactionsTable.h"
+#include "TransitionsTable.h"
 
 #define TerminationSymbols " \n~!@#$%^&*()_+=-`{}[];':"",./<>?"
 
@@ -18,7 +18,7 @@ public:
 
 	void AddWords(std::vector<std::string> words);
 
-	TrunsactionsTable* Generate();
+	TransitionsTable* Generate();
 
 	WordFinder(void);
 	~WordFinder(void);

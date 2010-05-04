@@ -25,7 +25,7 @@
 			IntermediateDirectory="$(ProjectDir)bin\$(PlatformName).$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="C:\ProgramData\NVIDIA Nexus 1.0\Samples\CUDA\NexusCudaToolkit32.v30.vsprops;C:\ProgramData\NVIDIA Nexus 1.0\Samples\CUDA\NexusCudaDefaultProject.Debug32.v30.vsprops"
-			CharacterSet="1"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -203,7 +203,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\CudaUtil.h"
+				>
+			</File>
+			<File
 				RelativePath=".\FileStruct.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Word.h"
 				>
 			</File>
 		</Filter>

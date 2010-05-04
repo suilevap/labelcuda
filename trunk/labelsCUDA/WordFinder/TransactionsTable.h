@@ -8,8 +8,8 @@ public:
 
 	TrunsactionsTable(size_t count)
 	{
-		Table = new Transition[count];
-		Size = count * State.StateSize;
+		Size = count * State::StateSize;
+		Table = new Transition[Size];
 	}
 
 	inline Transition GetTransaction(int id, char symbol)
@@ -19,7 +19,7 @@ public:
 	}
 	inline Transition* GetState(int id)
 	{
-		return Table + id * State.StateSize;
+		return Table + id * State::StateSize;
 	}
 
 	~TrunsactionsTable()

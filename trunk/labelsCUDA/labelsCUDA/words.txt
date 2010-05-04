@@ -1,9 +1,9 @@
 Google
-Search 
-engine 
+Search
+engine
 service
 webpage
-Image 
+Image
 developed
 capability
 synonym
@@ -16,4 +16,4 @@ pages
 priority
 rank
 PageRank
-provide 
+provide

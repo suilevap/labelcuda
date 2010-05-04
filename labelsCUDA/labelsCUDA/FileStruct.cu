@@ -32,7 +32,7 @@ size_t FileStruct::LoadFile(char* path, char* &buffer)
 	size_t fileLen;
 	
 	//Open file
-	file = fopen(path, "rt");
+	file = fopen(path, "rb");
 	if (!file)
 	{
 		fprintf(stderr, "Unable to open file %s", path);
@@ -41,7 +41,7 @@ size_t FileStruct::LoadFile(char* path, char* &buffer)
 	
 	//Get file length
 	fseek(file, 0, SEEK_END);
-	fileLen=ftell(file);
+	fileLen = ftell(file);
 	fseek(file, 0, SEEK_SET);
 
 	//Allocate memory
@@ -49,12 +49,13 @@ size_t FileStruct::LoadFile(char* path, char* &buffer)
 	if (!buffer)
 	{
 		fprintf(stderr, "Memory error!");
-                                fclose(file);
+        fclose(file);
 		return 0;
 	}
 
 	//Read file contents into buffer
 	fread(buffer, fileLen, 1, file);
+	buffer[fileLen] = 0;
 	fclose(file);
 
 	return fileLen;

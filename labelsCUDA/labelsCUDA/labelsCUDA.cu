@@ -13,7 +13,7 @@
 //#include <C:\Program Files\NVIDIA Nexus 1.0\CUDA Toolkit\v3.0\Win32\CUDA\include\thrust/device_vector.h>
 
 #include <cuda_runtime_api.h>
-
+#include "CudaUtil.h"
 //#include <thrust/host_vector.h>
 //#include <thrust/device_vector.h>
 //
@@ -24,6 +24,7 @@
 #include <iostream>
 //#include <FileLoader.h>
 #include "FileStruct.h"
+#include "Word.h"
 
 #include "..\WordFinder\WordFinderLib.h"
 
@@ -152,6 +153,29 @@ char* Test2(char* text, size_t size)
 	return a;
 }
 
+
+std::vector<Word>* host_FindAllWords(TrunsactionsTable* table, char* text )
+{
+	std::vector<Word>* words = new std::vector<Word>();
+	int state = 0;
+	Transition trans;
+	for (int i = 0; text[i] != 0; ++i)
+	{
+		trans = table->GetTransaction(state, text[i]);
+
+		if (trans.Output != 0)
+		{
+			Word word;
+			word.Id = trans.Output;
+			word.Pos = i;
+			words->push_back(word);
+		}
+		state = trans.NextState;
+	}
+
+	return words;
+}
+
 void Foo()
 {
 	WordFinder* finder = CreateWordFinder();
@@ -166,5 +190,17 @@ void Foo()
 	}
 	finder->AddWords( words );
 	delete[] tmpBuf;
-	TrunsactionsTable* tables = finder->Generate();
+	TrunsactionsTable* table = finder->Generate();
+	
+	FileStruct* file = new FileStruct(".\\goog0.txt");
+	char* text = file->GetHostBuffer();
+
+	event_pair time;
+	start_timer(&time);
+	
+	std::vector<Word>* findedWords = host_FindAllWords(table, text);
+	delete findedWords;
+	stop_timer(&time, "CPU word finder");
+
 }
+

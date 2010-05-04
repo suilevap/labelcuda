@@ -44,7 +44,8 @@ TrunsactionsTable* WordFinder::Generate()
 	TrunsactionsTable* result = new TrunsactionsTable(size);
 	for (size_t i = 0; i < size; ++i)
 	{
-		memcpy( result->GetState(i), _states[i]->Transitions, State.StateSize );
+		Transition * transaction =  result->GetState(i);
+		memcpy( transaction, _states[i]->Transitions, State::StateSize );
 	}
 	return result;
 }
@@ -53,6 +54,6 @@ void WordFinder::AddWords( std::vector<std::string> words )
 {
 	for (int i = 0; i < words.size(); i++)
 	{
-		AddWord(words[i], i);
+		AddWord(words[i], i+1);
 	}
 }

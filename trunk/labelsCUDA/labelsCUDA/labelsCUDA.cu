@@ -154,26 +154,59 @@ char* Test2(char* text, size_t size)
 }
 
 
-std::vector<Word>* host_FindAllWords(TrunsactionsTable* table, char* text )
+int host_FindAllWords(Transition* table, char* text, Word* words )
 {
-	std::vector<Word>* words = new std::vector<Word>();
+	int wordsCount = 0;
 	int state = 0;
 	Transition trans;
 	for (int i = 0; text[i] != 0; ++i)
 	{
-		trans = table->GetTransaction(state, text[i]);
+		trans = GetTransaction(table, state, text[i]);
 
 		if (trans.Output != 0)
 		{
 			Word word;
 			word.Id = trans.Output;
 			word.Pos = i;
-			words->push_back(word);
+			words[wordsCount++] = word;
 		}
 		state = trans.NextState;
 	}
 
-	return words;
+	return wordsCount;
+}
+
+__global__ void
+device_FindAllWords(Transition* table, char* text, int len, Word* words, int* count)
+{
+    // Block index
+    int bx = blockIdx.x;
+    int by = blockIdx.y;
+
+    // Thread index
+    int tx = threadIdx.x;
+	int ty = threadIdx.y;
+
+	int idx = threadIdx.x + blockDim.x * blockIdx.x;
+	if (idx < len)
+	{
+		//a[idx] = a[idx]+1;
+	}
+}
+
+
+bool FindedWordsEqual(Word * w1, int count1, Word* w2, int count2)
+{
+	bool result;
+	if (count1 = count2)
+	{
+		result = (memcmp(w1, w2, count1* sizeof(Word)) == 0);
+	}
+	else
+	{
+		result = false;
+	}
+	return result;
 }
 
 void Foo()
@@ -190,17 +223,39 @@ void Foo()
 	}
 	finder->AddWords( words );
 	delete[] tmpBuf;
-	TrunsactionsTable* table = finder->Generate();
+	TransitionsTable* table = finder->Generate();
 	
 	FileStruct* file = new FileStruct(".\\goog0.txt");
 	char* text = file->GetHostBuffer();
-
+	
 	event_pair time;
 	start_timer(&time);
-	
-	std::vector<Word>* findedWords = host_FindAllWords(table, text);
+	Word* findedWords = new Word[file->GetSize()];
+	int count = host_FindAllWords(table->Table , text, findedWords);
 	delete findedWords;
 	stop_timer(&time, "CPU word finder");
+	
+	start_timer(&time);
 
+	size_t size = file->GetSize();
+
+	// setup execution parameters
+    dim3 threads(512, 1);
+    dim3 grid(size/512,1);
+
+    // execute the kernel
+	Transition* deviceTable = (Transition*)GetDeviceMemory(table->Table, table->Size);
+	int* pDeviceCount;  
+	Buffer deviceWordsCountBuf(sizeof(int));
+	
+	device_FindAllWords<<< grid, threads >>>(deviceTable, text, size, findedWords,  (int*)deviceWordsCountBuf.GetDevice());
+
+	int deviceWordsCount = *((int*)deviceWordsCountBuf.GetHost());
+
+	check_launch("CUDA word finder");
+	delete findedWords;
+	stop_timer(&time, "GPU word finder");
+	
+	
 }
 

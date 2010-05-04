@@ -38,13 +38,13 @@ void WordFinder::AddWord( std::string word, int id )
 	currentState->AddManyTransitions(TerminationSymbols, 0, id);
 }
 
-TrunsactionsTable* WordFinder::Generate()
+TransitionsTable* WordFinder::Generate()
 {
 	size_t size = _states.size();
-	TrunsactionsTable* result = new TrunsactionsTable(size);
+	TransitionsTable* result = new TransitionsTable(size);
 	for (size_t i = 0; i < size; ++i)
 	{
-		Transition * transaction =  result->GetState(i);
+		Transition * transaction =  GetState(result->Table,i);
 		memcpy( transaction, _states[i]->Transitions, State::StateSize );
 	}
 	return result;

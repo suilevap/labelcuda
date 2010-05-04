@@ -184,11 +184,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TransactionsTable.h"
+				RelativePath=".\Transition.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Transition.h"
+				RelativePath=".\TransitionsTable.h"
 				>
 			</File>
 			<File

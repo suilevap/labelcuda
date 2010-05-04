@@ -1,6 +1,7 @@
 #include "stdio.h"
 #include <cuda_runtime_api.h>
 
+#include "Buffer.h"
 
 struct event_pair
 {
@@ -79,4 +80,19 @@ bool AlmostEqual2sComplement(float A, float B, int maxUlps)
 	if (intDiff <= maxUlps)
 		return true;
 	return false;
+}
+
+inline void * GetDeviceMemory(void* buf, size_t  size)
+{
+	void* deviceBuffer;
+	cudaMalloc((void**) &deviceBuffer, size);
+	cudaMemcpy(deviceBuffer, buf, size, cudaMemcpyHostToDevice);
+	return deviceBuffer;
+}
+inline void * GetHostMemory(void* buf, size_t  size)
+{
+	void* hostBuffer;
+	hostBuffer = malloc(size);
+	cudaMemcpy(hostBuffer, buf, size, cudaMemcpyDeviceToHost);
+	return hostBuffer;
 }

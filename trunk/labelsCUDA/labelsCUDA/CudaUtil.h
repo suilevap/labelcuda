@@ -92,7 +92,7 @@ inline void * GetDeviceMemory(void* buf, size_t  size)
 inline void * GetHostMemory(void* buf, size_t  size)
 {
 	void* hostBuffer;
-	hostBuffer = malloc(size);
+	hostBuffer = new char[size];
 	cudaMemcpy(hostBuffer, buf, size, cudaMemcpyDeviceToHost);
 	return hostBuffer;
 }

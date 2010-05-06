@@ -13,7 +13,7 @@ Buffer::~Buffer(void)
 {
 	if (_hostMemory != NULL)
 	{
-		free(_hostMemory);
+		delete[](_hostMemory);
 	}
 	if (_deviceMemory != NULL)
 	{
@@ -25,7 +25,7 @@ void* Buffer::GetHost()
 {
 	if (_hostMemory == NULL)
 	{
-		_hostMemory = malloc(_size);
+		_hostMemory = new char[_size];
 	}
 	if (_deviceMemory != NULL)
 	{

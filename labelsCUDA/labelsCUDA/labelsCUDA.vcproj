@@ -33,11 +33,11 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				CommandLine=""
 			/>
 			<Tool
 				Name="Cudart Build Rule"
 				Include="&quot;$(NEXUS_CUDA_INC_PATH)&quot;"
-				Emulation="false"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -59,6 +59,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
+				EnablePREfast="true"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"

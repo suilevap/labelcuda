@@ -94,9 +94,10 @@ int PrintDevices(int deviceCount, int deviceSelected)
 
 int main()
 {
-	Foo();
-	PrintDevices(1,0);
+	//PrintDevices(1,0);
 
+	Foo();
+	return;
 
 
 	//char * buf;
@@ -190,8 +191,11 @@ device_FindAllWords(Transition* table, char* text, int len, Word* words, int* co
 	int idx = threadIdx.x + blockDim.x * blockIdx.x;
 	if (idx < len)
 	{
-		//a[idx] = a[idx]+1;
+		Transition trans = GetTransaction(table, 0, text[idx]);
+
+		text[idx] = text[idx];
 	}
+	//count[0] = 31;
 }
 
 
@@ -212,7 +216,7 @@ bool FindedWordsEqual(Word * w1, int count1, Word* w2, int count2)
 void Foo()
 {
 	WordFinder* finder = CreateWordFinder();
-	FILE* f = fopen("words.txt","rt");
+	FILE* f = fopen(".\\words.txt","rt");
 	char* tmpBuf = new char[64];
 	std::vector<std::string> words;
 	while (!feof(f))
@@ -232,7 +236,7 @@ void Foo()
 	start_timer(&time);
 	Word* findedWords = new Word[file->GetSize()];
 	int count = host_FindAllWords(table->Table , text, findedWords);
-	delete findedWords;
+	
 	stop_timer(&time, "CPU word finder");
 	
 	start_timer(&time);
@@ -242,20 +246,27 @@ void Foo()
 	// setup execution parameters
     dim3 threads(512, 1);
     dim3 grid(size/512,1);
+	
 
     // execute the kernel
-	Transition* deviceTable = (Transition*)GetDeviceMemory(table->Table, table->Size);
-	int* pDeviceCount;  
-	Buffer deviceWordsCountBuf(sizeof(int));
-	
-	device_FindAllWords<<< grid, threads >>>(deviceTable, text, size, findedWords,  (int*)deviceWordsCountBuf.GetDevice());
+	Transition* device_table = (Transition*)GetDeviceMemory(table->Table, table->Size);
+	check_cuda_error("Host to device Mem cpy:");
+	Buffer device_wordsCountBuf(sizeof(int));
+	int* pDeviceCount = (int*)device_wordsCountBuf.GetDevice();  
+	Buffer device_findedWordsBuf(512);
+	Word* device_findedWords = (Word*)device_findedWordsBuf.GetDevice();
+	char* device_text = file->GetDeviceBuffer();
+	device_FindAllWords<<< grid, threads >>>(device_table, device_text, size, device_findedWords,  pDeviceCount);
 
-	int deviceWordsCount = *((int*)deviceWordsCountBuf.GetHost());
-
-	check_launch("CUDA word finder");
-	delete findedWords;
+	int deviceWordsCount = *((int*)device_wordsCountBuf.GetHost());
+	Word* devicefindedWords = (Word*)device_findedWordsBuf.GetHost();
+	check_cuda_error("CUDA:");
+	//check_launch("CUDA word finder");
+	cudaFree(device_table);
 	stop_timer(&time, "GPU word finder");
 	
-	
+	delete[] findedWords;
+	delete file;
+	delete table;
 }
 

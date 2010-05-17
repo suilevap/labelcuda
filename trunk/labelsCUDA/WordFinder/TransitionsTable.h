@@ -1,6 +1,6 @@
 #pragma once
 
-#define GetState(table, id) (table + id * State::StateSize)
+#define GetState(table, id) (table + id * STATE_SIZE)
 
 #define GetTransaction(table, id, s) ( GetState(table, id)[s])
 
@@ -12,8 +12,9 @@ public:
 
 	TransitionsTable(size_t count)
 	{
-		Size = count * State::StateSize;
+		Size = count * STATE_SIZE;
 		Table = new Transition[Size];
+		memset(Table, 0, Size * sizeof(Transition));
 	}
 
 	//inline Transition GetTransaction(int id, char symbol)

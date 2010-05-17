@@ -175,10 +175,68 @@ int host_FindAllWords(Transition* table, char* text, Word* words )
 	}
 
 	return wordsCount;
+} 
+
+__global__ void
+device_FindAllWords(Transition* table, char* text, int len, Word* words, int* count, int * allWords, int* allCount)
+{
+    // Block index
+    int bx = blockIdx.x;
+    int by = blockIdx.y;
+
+    // Thread index
+    int tx = threadIdx.x;
+	int ty = threadIdx.y;
+	__shared__ int wordsCount;
+	__global__ int allWords[blockDim.x];
+	__shared__ int allWordsCount;
+
+	if (tx == 0)
+	{
+		wordsCount = 0;
+		allWordsCount = 0;
+	}
+
+	int idx = threadIdx.x + blockDim.x * blockIdx.x;
+	if (tx < len)
+	{
+		if (text[tx] == ' ')
+		{		
+			allWords[allWordsCount] = idx;
+		}
+		else
+		{
+			allWords[tx] = 0;
+		}
+	}
+	__syncthreads();
+	if (tx==0)
+	{
+
+	}
+			/*int state = 0;
+			int output;
+			idx++;
+			do
+			{
+				Transition trans = GetTransaction(table, state, text[idx]);
+				idx++;
+				state = trans.NextState;
+				output = trans.Output;
+				if (output != 0)
+				{					
+					atomicAdd(&wordsCount, 1);
+				}					
+			}
+			while((state != 0) && (idx < len));*/
+		
+		
+		//text[idx] = text[idx];
+
 }
 
 __global__ void
-device_FindAllWords(Transition* table, char* text, int len, Word* words, int* count)
+device_WatchDebug(char * str)
 {
     // Block index
     int bx = blockIdx.x;
@@ -189,15 +247,9 @@ device_FindAllWords(Transition* table, char* text, int len, Word* words, int* co
 	int ty = threadIdx.y;
 
 	int idx = threadIdx.x + blockDim.x * blockIdx.x;
-	if (idx < len)
-	{
-		Transition trans = GetTransaction(table, 0, text[idx]);
-
-		text[idx] = text[idx];
-	}
-	//count[0] = 31;
+	char * s = str;
+	s[tx] = 'A';
 }
-
 
 bool FindedWordsEqual(Word * w1, int count1, Word* w2, int count2)
 {
@@ -235,9 +287,9 @@ void Foo()
 	event_pair time;
 	start_timer(&time);
 	Word* findedWords = new Word[file->GetSize()];
-	int count = host_FindAllWords(table->Table , text, findedWords);
+	int host_count = host_FindAllWords(table->Table , text, findedWords);
 	
-	stop_timer(&time, "CPU word finder");
+	float host_time = stop_timer(&time, "CPU word finder");
 	
 	start_timer(&time);
 
@@ -248,23 +300,32 @@ void Foo()
     dim3 grid(size/512,1);
 	
 
-    // execute the kernel
+    // execute the kernel	
 	Transition* device_table = (Transition*)GetDeviceMemory(table->Table, table->Size);
 	check_cuda_error("Host to device Mem cpy:");
-	Buffer device_wordsCountBuf(sizeof(int));
+	Buffer device_wordsCountBuf(sizeof(int) * 2);
 	int* pDeviceCount = (int*)device_wordsCountBuf.GetDevice();  
-	Buffer device_findedWordsBuf(512);
+	Buffer device_findedWordsBuf(512 * sizeof(Word));
 	Word* device_findedWords = (Word*)device_findedWordsBuf.GetDevice();
 	char* device_text = file->GetDeviceBuffer();
-	device_FindAllWords<<< grid, threads >>>(device_table, device_text, size, device_findedWords,  pDeviceCount);
+	Buffer allWords(sizeof(int)*size/4);
+	Buffer allWordsCount(sizeof(int));
+	device_FindAllWords<<< grid, threads >>>(device_table, device_text, size, device_findedWords,  pDeviceCount,
+		allWords.GetDevice(), allWordsCount.GetDevice());
 
-	int deviceWordsCount = *((int*)device_wordsCountBuf.GetHost());
+	int device_count = *((int*)device_wordsCountBuf.GetHost());
 	Word* devicefindedWords = (Word*)device_findedWordsBuf.GetHost();
+	cudaFree(device_table);
 	check_cuda_error("CUDA:");
 	//check_launch("CUDA word finder");
-	cudaFree(device_table);
-	stop_timer(&time, "GPU word finder");
+	float device_time = stop_timer(&time, "GPU word finder");
 	
+	Buffer result(512);
+	
+	sprintf((char*)result.GetHost(),"CPU version time: %f, Count: %d ; Device version time: %f, count %d; allWord count: %d ",
+		host_time, host_count, device_time, device_count, allWordsCount.GetHost());
+	device_WatchDebug<<< 1, 1 >>>((char*)result.GetDevice());
+
 	delete[] findedWords;
 	delete file;
 	delete table;

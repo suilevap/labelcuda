@@ -4,7 +4,7 @@
 
 State::State(void)
 {
-	memset(Transitions, 0, StateSize);
+	memset(Transitions, 0, STATE_SIZE);
 }
 
 State::~State(void)

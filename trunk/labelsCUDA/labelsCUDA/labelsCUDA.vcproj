@@ -37,7 +37,8 @@
 			/>
 			<Tool
 				Name="Cudart Build Rule"
-				Include="&quot;$(NEXUS_CUDA_INC_PATH)&quot;"
+				Include="&quot;$(NEXUS_CUDA_INC_PATH)&quot;;&quot;..\common\src&quot;"
+				Arch="12"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"

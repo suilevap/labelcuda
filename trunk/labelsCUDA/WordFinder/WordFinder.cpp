@@ -45,7 +45,7 @@ TransitionsTable* WordFinder::Generate()
 	for (size_t i = 0; i < size; ++i)
 	{
 		Transition * transaction =  GetState(result->Table,i);
-		memcpy( transaction, _states[i]->Transitions, State::StateSize );
+		memcpy( transaction, _states[i]->Transitions, STATE_SIZE );
 	}
 	return result;
 }

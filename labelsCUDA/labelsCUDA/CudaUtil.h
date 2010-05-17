@@ -51,7 +51,7 @@ inline void start_timer(event_pair * p)
 }
 
 
-inline void stop_timer(event_pair * p, char * kernel_name)
+inline float stop_timer(event_pair * p, char * kernel_name)
 {
 	cudaEventRecord(p->end, 0);
 	cudaEventSynchronize(p->end);
@@ -61,6 +61,7 @@ inline void stop_timer(event_pair * p, char * kernel_name)
 	printf("%s took %.1f ms\n",kernel_name, elapsed_time);
 	cudaEventDestroy(p->start);
 	cudaEventDestroy(p->end);
+	return elapsed_time;
 }
 
 bool AlmostEqual2sComplement(float A, float B, int maxUlps)

@@ -37,7 +37,7 @@
 			/>
 			<Tool
 				Name="Cudart Build Rule"
-				Include="&quot;$(NEXUS_CUDA_INC_PATH)&quot;;&quot;..\common\src&quot;"
+				Include="&quot;$(NEXUS_CUDA_INC_PATH)&quot;;&quot;..\common\src&quot;;&quot;..\common\inc&quot;"
 				Arch="12"
 			/>
 			<Tool
@@ -52,7 +52,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=""
+				AdditionalIncludeDirectories="&quot;$(CUDA_INC_PATH)&quot;;./../../../common/inc;./../../common/inc;../../common/inc/cudpp;./../common/inc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -73,7 +73,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="cutil32.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="../common/lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -247,6 +249,14 @@
 				RelativePath=".\words.txt"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="scan"
+			>
+			<Filter
+				Name="src"
+				>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

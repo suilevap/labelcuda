@@ -4,11 +4,14 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "labelsCUDA", "labelsCUDA\labelsCUDA.vcproj", "{298D2361-4AAD-4280-90EA-8631BA613B16}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D721B328-86A6-4085-9586-52453B78D5AA} = {D721B328-86A6-4085-9586-52453B78D5AA}
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA} = {94BAC654-4582-4107-86FE-D9B347AFA5AA}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WordFinder", "WordFinder\WordFinder.vcproj", "{D721B328-86A6-4085-9586-52453B78D5AA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scanLargeArray", "scanLargeArray\scanLargeArray.vcproj", "{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cudpp", "cudpp\cudpp_vc90.vcproj", "{94BAC654-4582-4107-86FE-D9B347AFA5AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,6 +19,10 @@ Global
 		EmuDebug|Win32 = EmuDebug|Win32
 		EmuRelease|Win32 = EmuRelease|Win32
 		Release|Win32 = Release|Win32
+		StaticLib_Debug|Win32 = StaticLib_Debug|Win32
+		StaticLib_EmuDebug|Win32 = StaticLib_EmuDebug|Win32
+		StaticLib_EmuRelease|Win32 = StaticLib_EmuRelease|Win32
+		StaticLib_Release|Win32 = StaticLib_Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{298D2361-4AAD-4280-90EA-8631BA613B16}.Debug|Win32.ActiveCfg = Debug|Win32
@@ -26,6 +33,14 @@ Global
 		{298D2361-4AAD-4280-90EA-8631BA613B16}.EmuRelease|Win32.Build.0 = Release|Win32
 		{298D2361-4AAD-4280-90EA-8631BA613B16}.Release|Win32.ActiveCfg = Release|Win32
 		{298D2361-4AAD-4280-90EA-8631BA613B16}.Release|Win32.Build.0 = Release|Win32
+		{298D2361-4AAD-4280-90EA-8631BA613B16}.StaticLib_Debug|Win32.ActiveCfg = Debug|Win32
+		{298D2361-4AAD-4280-90EA-8631BA613B16}.StaticLib_Debug|Win32.Build.0 = Debug|Win32
+		{298D2361-4AAD-4280-90EA-8631BA613B16}.StaticLib_EmuDebug|Win32.ActiveCfg = Debug|Win32
+		{298D2361-4AAD-4280-90EA-8631BA613B16}.StaticLib_EmuDebug|Win32.Build.0 = Debug|Win32
+		{298D2361-4AAD-4280-90EA-8631BA613B16}.StaticLib_EmuRelease|Win32.ActiveCfg = Release|Win32
+		{298D2361-4AAD-4280-90EA-8631BA613B16}.StaticLib_EmuRelease|Win32.Build.0 = Release|Win32
+		{298D2361-4AAD-4280-90EA-8631BA613B16}.StaticLib_Release|Win32.ActiveCfg = Release|Win32
+		{298D2361-4AAD-4280-90EA-8631BA613B16}.StaticLib_Release|Win32.Build.0 = Release|Win32
 		{D721B328-86A6-4085-9586-52453B78D5AA}.Debug|Win32.ActiveCfg = Debug|Win32
 		{D721B328-86A6-4085-9586-52453B78D5AA}.Debug|Win32.Build.0 = Debug|Win32
 		{D721B328-86A6-4085-9586-52453B78D5AA}.EmuDebug|Win32.ActiveCfg = Debug|Win32
@@ -34,6 +49,14 @@ Global
 		{D721B328-86A6-4085-9586-52453B78D5AA}.EmuRelease|Win32.Build.0 = Release|Win32
 		{D721B328-86A6-4085-9586-52453B78D5AA}.Release|Win32.ActiveCfg = Release|Win32
 		{D721B328-86A6-4085-9586-52453B78D5AA}.Release|Win32.Build.0 = Release|Win32
+		{D721B328-86A6-4085-9586-52453B78D5AA}.StaticLib_Debug|Win32.ActiveCfg = Debug|Win32
+		{D721B328-86A6-4085-9586-52453B78D5AA}.StaticLib_Debug|Win32.Build.0 = Debug|Win32
+		{D721B328-86A6-4085-9586-52453B78D5AA}.StaticLib_EmuDebug|Win32.ActiveCfg = Debug|Win32
+		{D721B328-86A6-4085-9586-52453B78D5AA}.StaticLib_EmuDebug|Win32.Build.0 = Debug|Win32
+		{D721B328-86A6-4085-9586-52453B78D5AA}.StaticLib_EmuRelease|Win32.ActiveCfg = Release|Win32
+		{D721B328-86A6-4085-9586-52453B78D5AA}.StaticLib_EmuRelease|Win32.Build.0 = Release|Win32
+		{D721B328-86A6-4085-9586-52453B78D5AA}.StaticLib_Release|Win32.ActiveCfg = Release|Win32
+		{D721B328-86A6-4085-9586-52453B78D5AA}.StaticLib_Release|Win32.Build.0 = Release|Win32
 		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.Debug|Win32.ActiveCfg = Debug|Win32
 		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.Debug|Win32.Build.0 = Debug|Win32
 		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.EmuDebug|Win32.ActiveCfg = EmuDebug|Win32
@@ -42,6 +65,30 @@ Global
 		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.EmuRelease|Win32.Build.0 = EmuRelease|Win32
 		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.Release|Win32.ActiveCfg = Release|Win32
 		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.Release|Win32.Build.0 = Release|Win32
+		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.StaticLib_Debug|Win32.ActiveCfg = Debug|Win32
+		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.StaticLib_Debug|Win32.Build.0 = Debug|Win32
+		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.StaticLib_EmuDebug|Win32.ActiveCfg = EmuDebug|Win32
+		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.StaticLib_EmuDebug|Win32.Build.0 = EmuDebug|Win32
+		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.StaticLib_EmuRelease|Win32.ActiveCfg = EmuRelease|Win32
+		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.StaticLib_EmuRelease|Win32.Build.0 = EmuRelease|Win32
+		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.StaticLib_Release|Win32.ActiveCfg = Release|Win32
+		{EFF5B34B-675C-46ED-8E9B-D8C3CDA6964D}.StaticLib_Release|Win32.Build.0 = Release|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.Debug|Win32.Build.0 = Debug|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.EmuDebug|Win32.ActiveCfg = EmuDebug|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.EmuDebug|Win32.Build.0 = EmuDebug|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.EmuRelease|Win32.ActiveCfg = EmuRelease|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.EmuRelease|Win32.Build.0 = EmuRelease|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.Release|Win32.ActiveCfg = Release|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.Release|Win32.Build.0 = Release|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.StaticLib_Debug|Win32.ActiveCfg = StaticLib_Debug|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.StaticLib_Debug|Win32.Build.0 = StaticLib_Debug|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.StaticLib_EmuDebug|Win32.ActiveCfg = StaticLib_EmuDebug|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.StaticLib_EmuDebug|Win32.Build.0 = StaticLib_EmuDebug|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.StaticLib_EmuRelease|Win32.ActiveCfg = StaticLib_EmuRelease|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.StaticLib_EmuRelease|Win32.Build.0 = StaticLib_EmuRelease|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.StaticLib_Release|Win32.ActiveCfg = StaticLib_Release|Win32
+		{94BAC654-4582-4107-86FE-D9B347AFA5AA}.StaticLib_Release|Win32.Build.0 = StaticLib_Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

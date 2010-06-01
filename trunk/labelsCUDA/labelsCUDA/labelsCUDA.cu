@@ -27,6 +27,8 @@
 #include "Word.h"
 
 #include "..\WordFinder\WordFinderLib.h"
+#include "..\cudpp\include\cudpp.h"
+
 
 void Foo();
 
@@ -177,8 +179,66 @@ int host_FindAllWords(Transition* table, char* text, Word* words )
 	return wordsCount;
 } 
 
+//__global__ void
+//device_FindAllWords(Transition* table, char* text, int len, Word* words, int* count, int * allWords, int* allCount)
+//{
+//    // Block index
+//    int bx = blockIdx.x;
+//    int by = blockIdx.y;
+//
+//    // Thread index
+//    int tx = threadIdx.x;
+//	int ty = threadIdx.y;
+//	__shared__ int wordsCount;
+//	__global__ int allWords[blockDim.x];
+//	__shared__ int allWordsCount;
+//
+//	if (tx == 0)
+//	{
+//		wordsCount = 0;
+//		allWordsCount = 0;
+//	}
+//
+//	int idx = threadIdx.x + blockDim.x * blockIdx.x;
+//	if (tx < len)
+//	{
+//		if (text[tx] == ' ')
+//		{		
+//			allWords[allWordsCount] = idx;
+//		}
+//		else
+//		{
+//			allWords[tx] = 0;
+//		}
+//	}
+//	__syncthreads();
+//	if (tx==0)
+//	{
+//
+//	}
+//			/*int state = 0;
+//			int output;
+//			idx++;
+//			do
+//			{
+//				Transition trans = GetTransaction(table, state, text[idx]);
+//				idx++;
+//				state = trans.NextState;
+//				output = trans.Output;
+//				if (output != 0)
+//				{					
+//					atomicAdd(&wordsCount, 1);
+//				}					
+//			}
+//			while((state != 0) && (idx < len));*/
+//		
+//		
+//		//text[idx] = text[idx];
+//
+//}
+
 __global__ void
-device_FindAllWords(Transition* table, char* text, int len, Word* words, int* count, int * allWords, int* allCount)
+device_MarkAllWords(char* text, int len, int* terminatedSymbols)
 {
     // Block index
     int bx = blockIdx.x;
@@ -187,52 +247,89 @@ device_FindAllWords(Transition* table, char* text, int len, Word* words, int* co
     // Thread index
     int tx = threadIdx.x;
 	int ty = threadIdx.y;
-	__shared__ int wordsCount;
-	__global__ int allWords[blockDim.x];
-	__shared__ int allWordsCount;
 
-	if (tx == 0)
-	{
-		wordsCount = 0;
-		allWordsCount = 0;
-	}
 
 	int idx = threadIdx.x + blockDim.x * blockIdx.x;
-	if (tx < len)
+	if (idx < len)
 	{
-		if (text[tx] == ' ')
-		{		
-			allWords[allWordsCount] = idx;
+		char c = text[idx];
+		terminatedSymbols[idx] = (
+			(c == ' ')||
+			(c == '.')||
+			(c == ',')||
+			(c == '!')||
+			(c == '?'));		
+	}
+}
+
+__global__ void
+device_ExctractAllWords(int* position, int len, int* allCount)
+{
+    // Block index
+    int bx = blockIdx.x;
+    int by = blockIdx.y;
+
+    // Thread index
+    int tx = threadIdx.x;
+	int ty = threadIdx.y;
+	extern __shared__ int cached[];
+	int pos = position[tx];
+	cached[tx] = pos;
+	__syncthreads();
+	int idx = threadIdx.x + blockDim.x * blockIdx.x;
+	if (idx < len)
+	{
+		int posPrev;
+		if (tx!= 0)
+		{
+			posPrev = cached[tx-1];
 		}
 		else
 		{
-			allWords[tx] = 0;
+			posPrev = position[idx-1];
+		}
+
+		if (posPrev != pos)
+		{
+			position[pos] = idx;
 		}
 	}
-	__syncthreads();
-	if (tx==0)
+
+	if (idx == len)
 	{
-
+		*allCount = pos;
 	}
-			/*int state = 0;
-			int output;
-			idx++;
-			do
-			{
-				Transition trans = GetTransaction(table, state, text[idx]);
-				idx++;
-				state = trans.NextState;
-				output = trans.Output;
-				if (output != 0)
-				{					
-					atomicAdd(&wordsCount, 1);
-				}					
-			}
-			while((state != 0) && (idx < len));*/
-		
-		
-		//text[idx] = text[idx];
+}
 
+
+__global__ void
+device_FindAllWords(Transition* table, char* text, int len, int* position, int count, int* words)
+{
+    // Block index
+    int bx = blockIdx.x;
+    int by = blockIdx.y;
+
+    // Thread index
+    int tx = threadIdx.x;
+	int ty = threadIdx.y;
+
+	int idx = threadIdx.x + blockDim.x * blockIdx.x;
+	if (tx < count)
+	{
+		int state = 0;
+		int pos = position[idx];
+		int output;
+		pos++;
+		Transition trans;
+		do
+		{
+			trans = GetTransaction(table, state, text[pos]);
+			pos++;
+			state = trans.NextState;
+		}
+		while((state != 0) && (idx < len));
+		words[idx]	= trans.Output;			
+	}
 }
 
 __global__ void
@@ -263,6 +360,53 @@ bool FindedWordsEqual(Word * w1, int count1, Word* w2, int count2)
 		result = false;
 	}
 	return result;
+}
+
+
+
+
+void deviceFindAllWords(Transition* table, char* text, int len, Word* words, int* count, int * allWords, int* allCount)
+{
+	// setup execution parameters
+    dim3 threads(512, 1);
+    dim3 grid((len-1)/512+1,1);
+	int* terminatedSymbols;
+	int num_elements = len;
+	int mem_size = sizeof( int) * num_elements;
+
+	cudaMalloc(&terminatedSymbols, mem_size);
+	device_MarkAllWords<<< grid, threads >>>(text, len, terminatedSymbols);
+	
+
+	// allocate device memory output arrays
+    int* d_idata = terminatedSymbols;
+    int* d_odata = NULL;
+
+	//computeGold(d_odata, d_idata, num_elements);
+    cudaMalloc( (void**) &d_odata, mem_size);
+	
+
+	CUDPPConfiguration config;	
+	config.datatype = CUDPP_INT;
+	config.algorithm = CUDPP_COMPACT;
+	config.options = CUDPP_OPTION_FORWARD | CUDPP_OPTION_EXCLUSIVE |CUDPP_OPTION_INDEX;
+    
+    CUDPPHandle scanplan = 0;
+    CUDPPResult result = cudppPlan(&scanplan, config, len, 1, 0);  
+	size_t wordsCount;
+	cudppCompact(scanplan, d_odata, &wordsCount, text,(unsigned int*) terminatedSymbols, len);
+	cudaFree(d_odata);
+	Buffer wordsId(wordsCount);
+	cudppDestroyPlan(scanplan);
+	
+	device_FindAllWords<<< wordsCount/512, 512 >>>(table, text, len, d_odata, wordsCount, (int*) wordsId.GetDevice() );
+	config.options = CUDPP_OPTION_FORWARD | CUDPP_OPTION_EXCLUSIVE ;
+	result = cudppPlan(&scanplan, config, wordsCount, 1, 0); 
+	size_t keyWordsCount;
+	unsigned int* w = (unsigned int*) wordsId.GetDevice();
+	cudppCompact(scanplan, w, &keyWordsCount, w, w, len);
+
+
 }
 
 void Foo()
@@ -310,8 +454,10 @@ void Foo()
 	char* device_text = file->GetDeviceBuffer();
 	Buffer allWords(sizeof(int)*size/4);
 	Buffer allWordsCount(sizeof(int));
-	device_FindAllWords<<< grid, threads >>>(device_table, device_text, size, device_findedWords,  pDeviceCount,
-		allWords.GetDevice(), allWordsCount.GetDevice());
+	deviceFindAllWords(device_table, device_text, size, device_findedWords,  pDeviceCount,
+		(int*)allWords.GetDevice(), (int*)allWordsCount.GetDevice());
+	//device_FindAllWords<<< grid, threads >>>(device_table, device_text, size, device_findedWords,  pDeviceCount,
+	//	allWords.GetDevice(), allWordsCount.GetDevice());
 
 	int device_count = *((int*)device_wordsCountBuf.GetHost());
 	Word* devicefindedWords = (Word*)device_findedWordsBuf.GetHost();

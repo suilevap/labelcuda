@@ -1,4 +1,4 @@
-/*
+    /*
  * Copyright 1993-2007 NVIDIA Corporation.  All rights reserved.
  *
  * NOTICE TO USER:
@@ -49,6 +49,30 @@
 typedef unsigned int uint;
 typedef unsigned short ushort;
 
+#ifndef __CUDACC__
+#include <math.h>
+
+inline float fminf(float a, float b)
+{
+  return a < b ? a : b;
+}
+
+inline float fmaxf(float a, float b)
+{
+  return a < b ? a : b;
+}
+
+inline int max(int a, int b)
+{
+  return a > b ? a : b;
+}
+
+inline int min(int a, int b)
+{
+  return a < b ? a : b;
+}
+#endif
+
 // float functions
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -66,6 +90,12 @@ inline __device__ __host__ float clamp(float f, float a, float b)
 
 // int2 functions
 ////////////////////////////////////////////////////////////////////////////////
+
+// negate
+inline __host__ __device__ int2 operator-(int2 &a)
+{
+    return make_int2(-a.x, -a.y);
+}
 
 // addition
 inline __host__ __device__ int2 operator+(int2 a, int2 b)
@@ -116,6 +146,12 @@ inline __host__ __device__ float2 make_float2(float s)
 inline __host__ __device__ float2 make_float2(int2 a)
 {
     return make_float2(float(a.x), float(a.y));
+}
+
+// negate
+inline __host__ __device__ float2 operator-(float2 &a)
+{
+    return make_float2(-a.x, -a.y);
 }
 
 // addition
@@ -219,6 +255,12 @@ inline __host__ __device__ float2 floor(const float2 v)
     return make_float2(floor(v.x), floor(v.y));
 }
 
+// reflect
+inline __host__ __device__ float2 reflect(float2 i, float2 n)
+{
+	return i - 2.0f * n * dot(n,i);
+}
+
 // float3 functions
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -244,6 +286,12 @@ inline __host__ __device__ float3 make_float3(int3 a)
     return make_float3(float(a.x), float(a.y), float(a.z));
 }
 
+// negate
+inline __host__ __device__ float3 operator-(float3 &a)
+{
+    return make_float3(-a.x, -a.y, -a.z);
+}
+
 // min
 static __inline__ __host__ __device__ float3 fminf(float3 a, float3 b)
 {
@@ -261,6 +309,10 @@ inline __host__ __device__ float3 operator+(float3 a, float3 b)
 {
     return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
+inline __host__ __device__ float3 operator+(float3 a, float b)
+{
+    return make_float3(a.x + b, a.y + b, a.z + b);
+}
 inline __host__ __device__ void operator+=(float3 &a, float3 b)
 {
     a.x += b.x; a.y += b.y; a.z += b.z;
@@ -270,6 +322,10 @@ inline __host__ __device__ void operator+=(float3 &a, float3 b)
 inline __host__ __device__ float3 operator-(float3 a, float3 b)
 {
     return make_float3(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+inline __host__ __device__ float3 operator-(float3 a, float b)
+{
+    return make_float3(a.x - b, a.y - b, a.z - b);
 }
 inline __host__ __device__ void operator-=(float3 &a, float3 b)
 {
@@ -363,6 +419,12 @@ inline __host__ __device__ float3 floor(const float3 v)
     return make_float3(floor(v.x), floor(v.y), floor(v.z));
 }
 
+// reflect
+inline __host__ __device__ float3 reflect(float3 i, float3 n)
+{
+	return i - 2.0f * n * dot(n,i);
+}
+
 // float4 functions
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -382,6 +444,12 @@ inline __host__ __device__ float4 make_float4(float3 a, float w)
 inline __host__ __device__ float4 make_float4(int4 a)
 {
     return make_float4(float(a.x), float(a.y), float(a.z), float(a.w));
+}
+
+// negate
+inline __host__ __device__ float4 operator-(float4 &a)
+{
+    return make_float4(-a.x, -a.y, -a.z, -a.w);
 }
 
 // min
@@ -504,6 +572,12 @@ inline __host__ __device__ int3 make_int3(int s)
 inline __host__ __device__ int3 make_int3(float3 a)
 {
     return make_int3(int(a.x), int(a.y), int(a.z));
+}
+
+// negate
+inline __host__ __device__ int3 operator-(int3 &a)
+{
+    return make_int3(-a.x, -a.y, -a.z);
 }
 
 // min

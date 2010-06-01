@@ -33,52 +33,54 @@
  * the above Disclaimer and U.S. Government End Users Notice.
  */
 
-#ifndef MULTITHREADING_H
-#define MULTITHREADING_H
+#ifndef THREADS_H
+#define THREADS_H
 
 
-//Simple portable thread library.
+// Simple portable thread library.
 
 #if _WIN32
-    //Windows threads.
-    #include <windows.h>
 
-    typedef HANDLE CUTThread;
-    typedef unsigned (WINAPI *CUT_THREADROUTINE)(void *);
+// Windows threads.
+#include <windows.h>
 
-    #define CUT_THREADPROC unsigned WINAPI
-    #define  CUT_THREADEND return 0
+typedef HANDLE CUTThread;
+typedef unsigned (WINAPI * CUT_THREADROUTINE)(void *);
+
+#define CUT_THREADPROC        unsigned WINAPI
+#define CUT_THREADEND        return 0
 
 #else
-    //POSIX threads.
-    #include <pthread.h>
 
-    typedef pthread_t CUTThread;
-    typedef void *(*CUT_THREADROUTINE)(void *);
+// POSIX threads.
+#include <pthread.h>
 
-    #define CUT_THREADPROC void
-    #define  CUT_THREADEND 
+typedef pthread_t CUTThread;
+typedef void* (* CUT_THREADROUTINE)(void *);
+
+#define CUT_THREADPROC        void
+#define CUT_THREADEND        
+
 #endif
-
 
 #ifdef __cplusplus
-    extern "C" {
+extern "C" {
 #endif
 
-//Create thread.
-CUTThread cutStartThread(CUT_THREADROUTINE, void *data);
+// Create thread.
+CUTThread cutStartThread(CUT_THREADROUTINE, void * data);
 
-//Wait for thread to finish.
+// Wait for thread to finish.
 void cutEndThread(CUTThread thread);
 
-//Destroy thread.
+// Destroy thread.
 void cutDestroyThread(CUTThread thread);
 
-//Wait for multiple threads.
-void cutWaitForThreads(const CUTThread *threads, int num);
+// Wait for multiple threads.
+void cutWaitForThreads(const CUTThread * threads, int num);
 
 #ifdef __cplusplus
-} //extern "C"
+} // extern "C"
 #endif
 
-#endif //MULTITHREADING_H
+#endif // THREADS_H

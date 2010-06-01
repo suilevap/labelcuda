@@ -33,6 +33,8 @@
 #ifndef _CUTIL_H_
 #define _CUTIL_H_
 
+#include <cuda_runtime.h>
+
 #ifdef _WIN32
 #   pragma warning( disable : 4996 ) // disable deprecated warning 
 #endif
@@ -98,7 +100,7 @@ extern "C" {
                         const char* aname, const int index);
 
     ////////////////////////////////////////////////////////////////////////////
-    //! Find the path for a filename
+    //! Find the path for a filename within a hardcoded set of paths
     //! @return the path if succeeded, otherwise 0
     //! @param filename        name of the file
     //! @param executablePath  optional absolute path of the executable
@@ -106,6 +108,26 @@ extern "C" {
     DLL_MAPPING
     char* CUTIL_API
     cutFindFilePath(const char* filename, const char* executablePath);
+
+    ////////////////////////////////////////////////////////////////////////////
+    //! Find the path for a filename within a specified directory tree
+    //! @return the path if succeeded, otherwise 0
+    //! @param filename        name of the file
+    //! @param executablePath  optional absolute path of the executable
+    ////////////////////////////////////////////////////////////////////////////
+    DLL_MAPPING
+    CUTBoolean CUTIL_API
+    cutFindFile(char * outputPath, const char * startDir, const char * dirName);
+
+    ////////////////////////////////////////////////////////////////////////////
+    //! Find the path for a filename within a specified directory tree
+    //! @return the path if succeeded, otherwise 0
+    //! @param filename        name of the file
+    //! @param executablePath  optional absolute path of the executable
+    ////////////////////////////////////////////////////////////////////////////
+    DLL_MAPPING
+    CUTBoolean CUTIL_API
+    cutFindDir(char * outputPath, const char * startDir, const char * dirName);
 
     ////////////////////////////////////////////////////////////////////////////
     //! Read file \filename containing single precision floating point data
@@ -571,6 +593,20 @@ extern "C" {
     cutCompareub( const unsigned char* reference, const unsigned char* data,
                   const unsigned int len ); 
 
+    ////////////////////////////////////////////////////////////////////////////////
+    //! Compare two integer arrays witha n epsilon tolerance for equality
+    //! @return  CUTTrue if \a reference and \a data are identical, 
+    //!          otherwise CUTFalse
+    //! @param reference  handle to the reference data / gold image
+    //! @param data       handle to the computed data
+    //! @param len        number of elements in reference and data
+    //! @param epsilon    epsilon to use for the comparison
+    ////////////////////////////////////////////////////////////////////////////////
+    DLL_MAPPING
+    CUTBoolean CUTIL_API
+    cutCompareube( const unsigned char* reference, const unsigned char* data,
+                 const unsigned int len, const int epsilon );
+
     ////////////////////////////////////////////////////////////////////////////
     //! Compare two float arrays with an epsilon tolerance for equality
     //! @return  CUTTrue if \a reference and \a data are identical, 
@@ -779,57 +815,52 @@ extern "C" {
 
 #if __DEVICE_EMULATION__
 
-#  define CUT_DEVICE_INIT()
+#  define CUT_DEVICE_INIT(ARGC, ARGV)
 
 #else
-#  define CUT_DEVICE_INIT() do {                                             \
+
+#  define CUT_DEVICE_INIT(ARGC, ARGV) {                                      \
     int deviceCount;                                                         \
     CUDA_SAFE_CALL_NO_SYNC(cudaGetDeviceCount(&deviceCount));                \
     if (deviceCount == 0) {                                                  \
-        fprintf(stderr, "There is no device.\n");                            \
+        fprintf(stderr, "cutil error: no devices supporting CUDA.\n");       \
         exit(EXIT_FAILURE);                                                  \
     }                                                                        \
-    int dev;                                                                 \
-    for (dev = 0; dev < deviceCount; ++dev) {                                \
-        cudaDeviceProp deviceProp;                                           \
-        CUDA_SAFE_CALL_NO_SYNC(cudaGetDeviceProperties(&deviceProp, dev));   \
-        if (deviceProp.major >= 1)                                           \
-            break;                                                           \
-    }                                                                        \
-    if (dev == deviceCount) {                                                \
-        fprintf(stderr, "There is no device supporting CUDA.\n");            \
+    int dev = 0;                                                             \
+    cutGetCmdLineArgumenti(ARGC, (const char **) ARGV, "device", &dev);      \
+    if (dev > deviceCount-1) dev = deviceCount - 1;                          \
+    cudaDeviceProp deviceProp;                                               \
+    CUDA_SAFE_CALL_NO_SYNC(cudaGetDeviceProperties(&deviceProp, dev));       \
+    if (deviceProp.major < 1) {                                              \
+        fprintf(stderr, "cutil error: device does not support CUDA.\n");     \
         exit(EXIT_FAILURE);                                                  \
     }                                                                        \
-    else                                                                     \
-        CUDA_SAFE_CALL(cudaSetDevice(dev));                                  \
-} while (0)
+    if (cutCheckCmdLineFlag(ARGC, (const char **) ARGV, "quiet") == CUTFalse) \
+        fprintf(stderr, "Using device %d: %s\n", dev, deviceProp.name);       \
+    CUDA_SAFE_CALL(cudaSetDevice(dev));                                      \
+}
 
 #endif
 
-#  define CUT_DEVICE_INIT_DRV(cuDevice) do {                                 \
+#  define CUT_DEVICE_INIT_DRV(cuDevice, ARGC, ARGV) {                        \
     cuDevice = 0;                                                            \
     int deviceCount = 0;                                                     \
     CUresult err = cuInit(0);                                                \
     if (CUDA_SUCCESS == err)                                                 \
         CU_SAFE_CALL_NO_SYNC(cuDeviceGetCount(&deviceCount));                \
     if (deviceCount == 0) {                                                  \
-        fprintf(stderr, "There is no device.\n");                            \
+        fprintf(stderr, "cutil error: no devices supporting CUDA\n");        \
         exit(EXIT_FAILURE);                                                  \
     }                                                                        \
-    int dev;                                                                 \
-    for (dev = 0; dev < deviceCount; ++dev) {                                \
-        int major, minor;                                                    \
-        CU_SAFE_CALL_NO_SYNC(cuDeviceComputeCapability(&major, &minor, dev));\
-        if (major >= 1)                                                      \
-            break;                                                           \
-    }                                                                        \
-    if (dev == deviceCount) {                                                \
-        fprintf(stderr, "There is no device supporting CUDA.\n");            \
-        exit(EXIT_FAILURE);                                                  \
-    }                                                                        \
-    else                                                                     \
-        CU_SAFE_CALL_NO_SYNC(cuDeviceGet(&cuDevice, dev));                   \
-} while (0)
+    int dev = 0;                                                             \
+    cutGetCmdLineArgumenti(ARGC, (const char **) ARGV, "device", &dev);      \
+    if (dev > deviceCount-1) dev = deviceCount - 1;                          \
+    CU_SAFE_CALL_NO_SYNC(cuDeviceGet(&cuDevice, dev));                       \
+    char name[100];                                                          \
+    cuDeviceGetName(name, 100, cuDevice);                                    \
+    if (cutCheckCmdLineFlag(ARGC, (const char **) ARGV, "quiet") == CUTFalse) \
+        fprintf(stderr, "Using device %d: %s\n", dev, name);                  \
+}
 
 #define CUT_EXIT(argc, argv)                                                 \
     if (!cutCheckCmdLineFlag(argc, (const char**)argv, "noprompt")) {        \

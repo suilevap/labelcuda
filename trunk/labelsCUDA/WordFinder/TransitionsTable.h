@@ -1,8 +1,8 @@
 #pragma once
 
-#define GetState(table, id) (table + id * STATE_SIZE)
+#define GetState(table, id) ((table) + (id) * STATE_SIZE)
 
-#define GetTransaction(table, id, s) ( GetState(table, id)[s])
+#define GetTransaction(table, id, s) ( GetState((table), (id))[(s)])
 
 class TransitionsTable
 {

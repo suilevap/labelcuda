@@ -10,6 +10,7 @@ class Buffer
 public:
 
 	Buffer(size_t size);
+	Buffer(size_t* size);
 	~Buffer(void);
 
 	size_t GetSize();

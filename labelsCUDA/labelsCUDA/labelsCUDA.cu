@@ -303,7 +303,7 @@ device_ExctractAllWords(int* position, int len, int* allCount)
 
 
 __global__ void
-device_FindAllWords(Transition* table, char* text, int len, int* position, int count, int* words)
+device_FindAllWords(Transition* table, char* text, int len, int* position, size_t* count, int* words)
 {
     // Block index
     int bx = blockIdx.x;
@@ -314,7 +314,7 @@ device_FindAllWords(Transition* table, char* text, int len, int* position, int c
 	int ty = threadIdx.y;
 
 	int idx = threadIdx.x + blockDim.x * blockIdx.x;
-	if (tx < count)
+	if (idx < *count)
 	{
 		int state = 0;
 		int pos = position[idx];
@@ -327,7 +327,7 @@ device_FindAllWords(Transition* table, char* text, int len, int* position, int c
 			pos++;
 			state = trans.NextState;
 		}
-		while((state != 0) && (idx < len));
+		while((state != 0) && (pos < len));
 		words[idx]	= trans.Output;			
 	}
 }
@@ -345,7 +345,7 @@ device_WatchDebug(char * str)
 
 	int idx = threadIdx.x + blockDim.x * blockIdx.x;
 	char * s = str;
-	s[tx] = 'A';
+	s[tx] = 'B';
 }
 
 bool FindedWordsEqual(Word * w1, int count1, Word* w2, int count2)
@@ -382,9 +382,7 @@ void deviceFindAllWords(Transition* table, char* text, int len, Word* words, int
     int* d_idata = terminatedSymbols;
     int* d_odata = NULL;
 
-	//computeGold(d_odata, d_idata, num_elements);
     cudaMalloc( (void**) &d_odata, mem_size);
-	
 
 	CUDPPConfiguration config;	
 	config.datatype = CUDPP_INT;
@@ -392,20 +390,27 @@ void deviceFindAllWords(Transition* table, char* text, int len, Word* words, int
 	config.options = CUDPP_OPTION_FORWARD | CUDPP_OPTION_EXCLUSIVE |CUDPP_OPTION_INDEX;
     
     CUDPPHandle scanplan = 0;
-    CUDPPResult result = cudppPlan(&scanplan, config, len, 1, 0);  
-	size_t wordsCount;
-	cudppCompact(scanplan, d_odata, &wordsCount, text,(unsigned int*) terminatedSymbols, len);
-	cudaFree(d_odata);
-	Buffer wordsId(wordsCount);
+    CUDPPResult result = cudppPlan(&scanplan, config, len, 1, 0); 
+	//Buffer wordsCountBuf(sizeof(size_t));
+	size_t* pwordsCount;
+    cudaMalloc( (void**) &pwordsCount, sizeof(size_t));
+
+	cudppCompact(scanplan, d_odata, pwordsCount, text,(unsigned int*) terminatedSymbols, len);
+	
+	//printf("Words count: %d \n", *(int*)(wordsCountBuf.GetHost()) );
+	//device_WatchDebug<<< 1, 1 >>>((char*)wordsCountBuf.GetDevice());
+
+	Buffer wordsId(pwordsCount);
 	cudppDestroyPlan(scanplan);
 	
-	device_FindAllWords<<< wordsCount/512, 512 >>>(table, text, len, d_odata, wordsCount, (int*) wordsId.GetDevice() );
+	device_FindAllWords<<< 2, 512 >>>(table, text, len, d_odata, pwordsCount, (int*) wordsId.GetDevice() );
 	config.options = CUDPP_OPTION_FORWARD | CUDPP_OPTION_EXCLUSIVE ;
-	result = cudppPlan(&scanplan, config, wordsCount, 1, 0); 
+	result = cudppPlan(&scanplan, config, *pwordsCount, 1, 0); 
 	size_t keyWordsCount;
 	unsigned int* w = (unsigned int*) wordsId.GetDevice();
 	cudppCompact(scanplan, w, &keyWordsCount, w, w, len);
-
+	cudaFree(d_odata);
+	cudaFree(pwordsCount);
 
 }
 

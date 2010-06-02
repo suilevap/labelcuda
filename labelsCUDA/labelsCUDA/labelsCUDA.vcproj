@@ -101,7 +101,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copying the Nexus-compatible CUDA runtime DLL to the output directory..."
-				CommandLine="echo copy &quot;$(NEXUS_CUDART_BIN_PATH)\cudart32_*.dll&quot; &quot;$(OutDir)\&quot;&#x0D;&#x0A;copy &quot;$(NEXUS_CUDART_BIN_PATH)\cudart32_*.dll&quot; &quot;$(OutDir)\&quot;&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(ProjectDir)\*.txt&quot; &quot;$(OutDir)\&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)\*.txt&quot; &quot;$(OutDir)\..\&quot;&#x0D;&#x0A;"
+				CommandLine="echo copy &quot;$(NEXUS_CUDART_BIN_PATH)\cudart32_*.dll&quot; &quot;$(OutDir)\&quot;&#x0D;&#x0A;copy &quot;$(NEXUS_CUDART_BIN_PATH)\cudart32_*.dll&quot; &quot;$(OutDir)\&quot;&#x0D;&#x0A;&#x0D;&#x0A;copy &quot;$(ProjectDir)\*.txt&quot; &quot;$(OutDir)\&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)\*.txt&quot; &quot;$(OutDir)\..\&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\cudpp\lib\*.dll&quot; &quot;$(OutDir)\&quot;"
 			/>
 		</Configuration>
 		<Configuration

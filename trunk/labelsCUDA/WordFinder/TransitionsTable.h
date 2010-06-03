@@ -9,12 +9,14 @@ class TransitionsTable
 public:
 	Transition*  Table;
 	int Size;
+	size_t FullSize;
 
 	TransitionsTable(size_t count)
 	{
 		Size = count * STATE_SIZE;
 		Table = new Transition[Size];
-		memset(Table, 0, Size * sizeof(Transition));
+		FullSize = Size * sizeof(Transition);
+		memset(Table, 0, FullSize);
 	}
 
 	//inline Transition GetTransaction(int id, char symbol)

@@ -1,6 +1,5 @@
 #pragma once
 
-
 class Buffer
 {
 	void* _hostMemory;
@@ -11,6 +10,9 @@ public:
 
 	Buffer(size_t size);
 	Buffer(size_t* size);
+
+	Buffer(size_t* pcount, size_t elemSize);
+
 	~Buffer(void);
 
 	size_t GetSize();

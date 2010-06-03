@@ -15,6 +15,14 @@ Buffer::Buffer(size_t* psize)
 	cudaMemcpy(&_size, psize, sizeof(size_t), cudaMemcpyDeviceToHost);
 }
 
+Buffer::Buffer(size_t* pcount, size_t elemSize)
+{
+	_hostMemory = NULL;
+	_deviceMemory = NULL;
+	cudaMemcpy(&_size, pcount, sizeof(size_t), cudaMemcpyDeviceToHost);
+	_size *= elemSize;
+}
+
 Buffer::~Buffer(void)
 {
 	if (_hostMemory != NULL)

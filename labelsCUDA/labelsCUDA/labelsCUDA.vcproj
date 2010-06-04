@@ -38,7 +38,10 @@
 			<Tool
 				Name="Cudart Build Rule"
 				Include="&quot;$(NEXUS_CUDA_INC_PATH)&quot;;&quot;..\common\src&quot;;&quot;..\common\inc&quot;"
+				GPUDebugInfo="false"
 				Arch="12"
+				FastMath="true"
+				Optimization="2"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -246,6 +249,10 @@
 			>
 			<File
 				RelativePath=".\goog0.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\goog0b.txt"
 				>
 			</File>
 			<File

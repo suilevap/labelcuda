@@ -22,13 +22,16 @@
 //#include <thrust/sequence.h>
 
 #include <iostream>
-//#include <FileLoader.h>
+#include <time.h>
+#include <vector>;
 #include "FileStruct.h"
 #include "Word.h"
 
 #include "..\WordFinder\WordFinderLib.h"
 #include "..\cudpp\include\cudpp.h"
 #include "deviceWordsFinder.h"
+
+
 
 void Foo();
 
@@ -159,23 +162,44 @@ char* Test2(char* text, size_t size)
 
 int host_FindAllWords(Transition* table, char* text, Word* words )
 {
-	int wordsCount = 0;
-	int state = 0;
-	Transition trans;
+	std::vector<int> w;
 	for (int i = 0; text[i] != 0; ++i)
 	{
-		trans = GetTransaction(table, state, text[i]);
-
-		if (trans.Output != 0)
+		char c = text[i];
+		bool r = ((
+			(c == ' ')||
+			(c == '.')||
+			(c == ',')||
+			(c == '!')||
+			(c == '?')) 
+			|| (i==0));	
+		if (r)
 		{
-			Word word;
-			word.Id = trans.Output;
-			word.Pos = i;
-			words[wordsCount++] = word;
+			w.push_back(i);
 		}
-		state = trans.NextState;
 	}
 
+	int wordsCount = 0;
+	for (int k=0; k < w.size()-1; k++)
+	{
+		int state = 0;
+		Transition trans;
+
+		for (int i = (w[k]); i <  (w[k+1]); ++i)
+		{
+			trans = GetTransaction(table, state, text[i]);
+
+			if (trans.Output != 0)
+			{
+				Word word;
+				word.Id = trans.Output;
+				word.Pos = i;
+				words[wordsCount++] = word;
+			}
+			state = trans.NextState;
+
+		}
+	}
 	return wordsCount;
 } 
 
@@ -225,20 +249,29 @@ void Foo()
 	delete[] tmpBuf;
 	TransitionsTable* table = finder->Generate();
 	
-	FileStruct* file = new FileStruct(".\\goog0.txt");
+	FileStruct* file = new FileStruct(".\\goog0b.txt");
 	char* text = file->GetHostBuffer();
 	
 	event_pair time;
 	start_timer(&time);
 	Word* findedWords = new Word[file->GetSize()];
 	int host_count;
-	for (int i = 0; i < 100; i++)
+
+	clock_t start, end;
+	
+	start = clock();
+
+	for (int i = 0; i < 1000; i++)
 	{
 		host_count = host_FindAllWords(table->Table , text, findedWords);
 	}
-	float host_time = stop_timer(&time, "CPU word finder");
+
+	end = clock();
+
+	double host_time= difftime(end, start)/CLOCKS_PER_SEC*1000;
+	printf("%s took %.1f ms\n","CPU", host_time);
+	//float host_time = (end-init)/CLOCKS_PER_SEC; //stop_timer(&time, "CPU word finder");
 	
-	start_timer(&time);
 
 	size_t size = file->GetSize();
 
@@ -259,21 +292,29 @@ void Foo()
 	Buffer allWords(sizeof(int)*size/4);
 	Buffer allWordsCount(sizeof(int));
 
-	deviceFindAllWordsPrepare(table);
-	for (int i = 0; i < 100; i++)
+	deviceFindAllWordsPrepare(table, size);
+	deviceFindAllWords( device_text, size, device_findedWords,  pDeviceCount,
+			(int*)allWords.GetDevice(), (int*)allWordsCount.GetDevice());
+	start = clock();
+	start_timer(&time);
+	for (int i = 0; i < 1000; i++)
 	{
 		deviceFindAllWords( device_text, size, device_findedWords,  pDeviceCount,
 			(int*)allWords.GetDevice(), (int*)allWordsCount.GetDevice());
 	}
 	//device_FindAllWords<<< grid, threads >>>(device_table, device_text, size, device_findedWords,  pDeviceCount,
 	//	allWords.GetDevice(), allWordsCount.GetDevice());
+	end = clock();
+
+	double device_time= difftime(end, start)/CLOCKS_PER_SEC*1000;
+	printf("%s took %.1f ms\n","GPU", device_time);
 
 	int device_count = *((int*)device_wordsCountBuf.GetHost());
 	Word* devicefindedWords = (Word*)device_findedWordsBuf.GetHost();
 	//cudaFree(device_table);
 	check_cuda_error("CUDA:");
 	//check_launch("CUDA word finder");
-	float device_time = stop_timer(&time, "GPU word finder");
+	device_time = stop_timer(&time, "GPU word finder");
 	
 	Buffer result(512);
 	
